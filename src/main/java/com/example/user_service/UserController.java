@@ -1,6 +1,6 @@
 package com.example.user_service;
-
-
+import com.example.user_service.client.OrderServiceClient;
+import com.example.user_service.dto.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +13,12 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    // to connect with Josefins Orders
+    @GetMapping("/{userId}/orders")
+    public List<Order> getUserOrders(@PathVariable Long userId) {
+        return userService.getUserOrders(userId);
+    }
 
     @GetMapping
     public List<User> getAllUsers() {
