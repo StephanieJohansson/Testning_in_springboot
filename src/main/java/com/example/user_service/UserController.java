@@ -1,8 +1,6 @@
 package com.example.user_service;
 
 
-import com.example.user_service.User;
-import com.example.user_service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -7,7 +7,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "users")
-@Data // Lombok: generetes getters/setters/toString automatically
+@Data // Lombok: generates getters/setters/toString automatically
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
