@@ -48,4 +48,12 @@ public class UserController {
         User user = userService.getUserByEmail(email);
         return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(
+            @PathVariable Long id,
+            @RequestBody User updatedUser) {
+        User user = userService.updateUser(id, updatedUser);
+        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+    }
 }

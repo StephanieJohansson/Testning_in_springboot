@@ -12,7 +12,7 @@ public class OrderServiceClient {
     private final WebClient webClient;
 
     public OrderServiceClient() {
-        this.webClient = WebClient.create("http://order-service-env.abc123.eu-north-1.elasticbeanstalk.com"); // put Josefins URL later
+        this.webClient = WebClient.create("http://order-service-env.abc123.eu-north-1.elasticbeanstalk.com"); // Josefin URL
     }
 
     public Mono<List<Order>> getOrdersByUserId(Long userId) {

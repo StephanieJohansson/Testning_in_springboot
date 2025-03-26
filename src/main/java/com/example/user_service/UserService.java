@@ -38,4 +38,8 @@ public class UserService {
     public List<Order> getUserOrders(Long userId) {
         return List.of();
     }
+
+    public User updateUser(Long id, User updatedUser) {
+        return updatedUser;
+    }
 }
