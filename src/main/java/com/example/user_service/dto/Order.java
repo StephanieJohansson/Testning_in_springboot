@@ -10,7 +10,19 @@ import java.time.LocalDateTime;
 public class Order {
     private Long id;
     private Long userId;
-    private LocalDateTime orderDate;
+    private String orderId;
+    private String product;
+
+
+    public Order(Long id, Long userId, String orderId, String product) {
+        this.id = id;
+        this.userId = userId;
+        this.orderId = orderId;
+        this.product = product;
+    }
+
+    public Order() {
+    }
 
     // Getter for id
     public Long getId() {
@@ -31,14 +43,5 @@ public class Order {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
-
-    // Getter for orderDate
-    public LocalDateTime getOrderDate() {
-        return orderDate;
     }
 
-    // Setter for orderDate
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
-    }
-}
