@@ -1,7 +1,7 @@
 package com.example.user_service;
 import com.example.user_service.client.OrderServiceClient;
-import com.example.user_service.dto.Order;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -29,22 +29,22 @@ public class UserController {
         this.userService = userService;
         this.orderServiceClient = orderServiceClient;
     }
+
     @GetMapping("/{userId}/orders")
-    public Mono<UserResponse> getUserWithOrders(@PathVariable Long userId) {
-
-        return userRepository.findById(userId)
-                .map(user ->
-                        orderServiceClient.getOrdersByUserId(userId)  // get orders from Joesfin
-                                .collectList()
-                                .map(orders -> new UserResponse(user, orders)))
-                .orElse(Mono.empty());
+    public Mono<ResponseEntity<UserResponse>> getUserWithOrders(@PathVariable Long userId) {
+        return Mono.fromSupplier(() -> userRepository.findById(userId))
+                .flatMap(optionalUser -> {
+                    if (optionalUser.isEmpty()) {
+                        return Mono.just(ResponseEntity.notFound().build());
+                    }
+                    User user = optionalUser.get();
+                    return orderServiceClient.getOrdersByUserId(userId)
+                            .collectList()
+                            .map(orders -> ResponseEntity.ok(new UserResponse(user, orders)))
+                            .onErrorResume(e -> Mono.just(
+                                    ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()));
+                });
     }
-
-    // to connect with Josefins Orders
-    //@GetMapping("/{userId}/orders")
-    //public List<Order> getUserOrders(@PathVariable Long userId) {
-      //  return userService.getUserOrders(userId);
-    //}
 
     @GetMapping
     public List<User> getAllUsers() {
@@ -68,7 +68,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // extra endpoint to get users by email, for OrderService?
+    // extra endpoint to get users by email
     @GetMapping("/by-email/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         User user = userService.getUserByEmail(email);

@@ -1,11 +1,8 @@
 package com.example.user_service.dto;
 
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class Order {
+
     private Long id;
     private Long userId;
     private String orderId;
@@ -22,8 +19,7 @@ public class Order {
     public Order() {
     }
 
-    // Getter for id
-    public Long getId() {
+    public Long getId(){
         return id;
     }
 
