@@ -10,27 +10,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final UserService userService;
-    private final OrderServiceClient orderServiceClient;
-    private final UserRepository userRepository;
 
     @Autowired
-    public UserController(UserService userService, OrderServiceClient orderServiceClient, UserRepository userRepository) {
-        this.userService = userService;
-        this.orderServiceClient = orderServiceClient;
-        this.userRepository = userRepository;
-    }
+    private UserService userService;
 
     // to connect with Josefins Orders
     @GetMapping("/{userId}/orders")
-     public List<Order> getUserOrders(@PathVariable Long userId) {
-        return orderServiceClient.getOrdersByUserId(userId).block();
+    public List<Order> getUserOrders(@PathVariable Long userId) {
+        return userService.getUserOrders(userId);
     }
-
 
     @GetMapping
     public List<User> getAllUsers() {
-
         return userService.getAllUsers();
     }
 
@@ -42,7 +33,6 @@ public class UserController {
 
     @PostMapping
     public User createUser(@RequestBody User user) {
-
         return userService.createUser(user);
     }
 
