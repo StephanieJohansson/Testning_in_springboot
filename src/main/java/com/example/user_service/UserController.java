@@ -4,6 +4,8 @@ import com.example.user_service.dto.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -11,14 +13,38 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
+    private final WebClient webclient;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final OrderServiceClient orderServiceClient;
+    private String WEB_CLIENT_URL = System.getenv("WEB_CLIENT_URL");
+
     @Autowired
-    private UserService userService;
+    public UserController(WebClient.Builder webclientBuilder,
+                          UserRepository userRepository,
+                          UserService userService,
+                          OrderServiceClient orderServiceClient) {
+        this.webclient = webclientBuilder.baseUrl(WEB_CLIENT_URL).build();
+        this.userRepository = userRepository;
+        this.userService = userService;
+        this.orderServiceClient = orderServiceClient;
+    }
+    @GetMapping("/{userId}/orders")
+    public Mono<UserResponse> getUserWithOrders(@PathVariable Long userId) {
+
+        return userRepository.findById(userId)
+                .map(user ->
+                        orderServiceClient.getOrdersByUserId(userId)  // get orders from Joesfin
+                                .collectList()
+                                .map(orders -> new UserResponse(user, orders)))
+                .orElse(Mono.empty());
+    }
 
     // to connect with Josefins Orders
-    @GetMapping("/{userId}/orders")
-    public List<Order> getUserOrders(@PathVariable Long userId) {
-        return userService.getUserOrders(userId);
-    }
+    //@GetMapping("/{userId}/orders")
+    //public List<Order> getUserOrders(@PathVariable Long userId) {
+      //  return userService.getUserOrders(userId);
+    //}
 
     @GetMapping
     public List<User> getAllUsers() {

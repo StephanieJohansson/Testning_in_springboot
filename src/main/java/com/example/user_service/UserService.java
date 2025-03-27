@@ -11,7 +11,6 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private OrderServiceClient orderServiceClient;
 
     public List<User> getAllUsers() {
