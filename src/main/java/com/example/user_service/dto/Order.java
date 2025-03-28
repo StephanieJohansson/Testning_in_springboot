@@ -1,78 +1,52 @@
 package com.example.user_service.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.time.Instant;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Order {
-
-    @JsonProperty("id")
     private Long id;
-
-    @JsonProperty("user_id")
     private Long userId;
-
-    @JsonProperty("order_id")
-    private String orderId;
-
-    @JsonProperty("product_name")
     private String product;
+    private Long productID;
 
-    @JsonProperty("created_at")
-    private String createdAt;
+    // Default constructor
+    public Order() {}
 
-    @JsonProperty("last_updated")
-    private String lastUpdated;
-
-    // Default constructor for jackson
-    public Order() {
-        this.createdAt = Instant.now().toString();
-        this.lastUpdated = this.createdAt;
+    // Getters och Setters
+    @JsonProperty("id")
+    public Long getId() {
+        return id;
     }
 
-    // full constructor
-    public Order(Long id, Long userId, String orderId, String product) {
-        this();
+    public void setId(Long id) {
         this.id = id;
-        this.userId = userId;
-        this.orderId = orderId;
-        this.product = product;
     }
 
-    // constructor for post-requests
-    public Order(Long userId, String product) {
-        this();
-        this.userId = userId;
-        this.product = product;
-        this.orderId = generateOrderId();
+    @JsonProperty("userId")
+    public Long getUserId() {
+        return userId;
     }
 
-    // Getter/Setter
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-    // Getter/Setter
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    @JsonProperty("product")
+    public String getProduct() {
+        return product;
+    }
 
-    // Getter/Setter
-    public String getOrderId() { return orderId; }
-    public void setOrderId(String orderId) { this.orderId = orderId; }
-
-    // Getter/Setter
-    public String getProduct() { return product; }
     public void setProduct(String product) {
         this.product = product;
-        this.lastUpdated = Instant.now().toString();
     }
 
-    // Getter for timestamp
-    public String getCreatedAt() { return createdAt; }
-    public String getLastUpdated() { return lastUpdated; }
+    @JsonProperty("productID")
+    public Long getProductID() {
+        return productID;
+    }
 
-    // help method for orderId-generating
-    private String generateOrderId() {
-        return "ORD-" + Instant.now().toEpochMilli() + "-" + this.userId;
+    public void setProductID(Long productID) {
+        this.productID = productID;
     }
 }

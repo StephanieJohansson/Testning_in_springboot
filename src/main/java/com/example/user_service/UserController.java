@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -33,35 +34,19 @@ public class UserController {
         this.userService = userService;
     }
 
-    // Reaktiva endpoints (använder Mono/Flux)
+
     @GetMapping("/{userId}/orders")
-    public Mono<ResponseEntity<?>> getUserWithOrders(@PathVariable Long userId) {
-        return Mono.fromSupplier(() -> userRepository.findById(userId))
-                .flatMap(optionalUser -> {
-                    if (optionalUser.isEmpty()) {
-                        return Mono.just(ResponseEntity.notFound().build());
-                    }
-                    return webClient.get()
-                            .uri("/orders/users/{userId}", userId)
-                            .retrieve()
-                            .bodyToFlux(Order.class)
-                            .collectList()
-                            .map(orders -> ResponseEntity.ok(Map.of(
-                                    "user", optionalUser.get(),
-                                    "orders", orders
-                            )));
-                });
-    }
-
-    // Endpoint för order-tjänsten att hämta användarinformation for order-service to get userinfo
-    @GetMapping("/for-orders/{userId}")
-    public Mono<ResponseEntity<User>> getUserForOrdersService(@PathVariable Long userId) {
-        return Mono.justOrEmpty(userRepository.findById(userId))
+    public Mono<ResponseEntity<List<Order>>> getUserWithOrders(@PathVariable Long userId) {
+        return webClient.get()
+                .uri("${order.service.url}")
+                .retrieve()
+                .bodyToFlux(Order.class)
+                .filter(order -> order.getUserId().equals(userId))
+                .collectList()
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .defaultIfEmpty(ResponseEntity.ok(Collections.emptyList()));
     }
 
-    //
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
