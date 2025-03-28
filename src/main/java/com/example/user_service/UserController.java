@@ -1,51 +1,67 @@
 package com.example.user_service;
-import com.example.user_service.client.OrderServiceClient;
+
+import com.example.user_service.dto.Order;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    private final WebClient webclient;
-    private final UserService userService;
+    private final WebClient webClient;
     private final UserRepository userRepository;
-    private final OrderServiceClient orderServiceClient;
-    private String WEB_CLIENT_URL = System.getenv("WEB_CLIENT_URL");
+    private final UserService userService;
 
     @Autowired
-    public UserController(WebClient.Builder webclientBuilder,
+    public UserController(WebClient.Builder webClientBuilder,
+                          @Value("${order.service.url}") String orderServiceUrl,
                           UserRepository userRepository,
-                          UserService userService,
-                          OrderServiceClient orderServiceClient) {
-        this.webclient = webclientBuilder.baseUrl(WEB_CLIENT_URL).build();
+                          UserService userService) {
+        this.webClient = webClientBuilder
+                .baseUrl(orderServiceUrl)
+                .build();
         this.userRepository = userRepository;
         this.userService = userService;
-        this.orderServiceClient = orderServiceClient;
     }
 
+    // Reaktiva endpoints (använder Mono/Flux)
     @GetMapping("/{userId}/orders")
-    public Mono<ResponseEntity<UserResponse>> getUserWithOrders(@PathVariable Long userId) {
+    public Mono<ResponseEntity<?>> getUserWithOrders(@PathVariable Long userId) {
         return Mono.fromSupplier(() -> userRepository.findById(userId))
                 .flatMap(optionalUser -> {
                     if (optionalUser.isEmpty()) {
                         return Mono.just(ResponseEntity.notFound().build());
                     }
-                    User user = optionalUser.get();
-                    return orderServiceClient.getOrdersByUserId(userId)
+                    return webClient.get()
+                            .uri("/orders/users/{userId}", userId)
+                            .retrieve()
+                            .bodyToFlux(Order.class)
                             .collectList()
-                            .map(orders -> ResponseEntity.ok(new UserResponse(user, orders)))
-                            .onErrorResume(e -> Mono.just(
-                                    ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()));
+                            .map(orders -> ResponseEntity.ok(Map.of(
+                                    "user", optionalUser.get(),
+                                    "orders", orders
+                            )));
                 });
     }
 
+    // Endpoint för order-tjänsten att hämta användarinformation for order-service to get userinfo
+    @GetMapping("/for-orders/{userId}")
+    public Mono<ResponseEntity<User>> getUserForOrdersService(@PathVariable Long userId) {
+        return Mono.justOrEmpty(userRepository.findById(userId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    //
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
@@ -53,8 +69,9 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        User user = userService.getUserById(id);
-        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+        return userRepository.findById(id)
+                .map(user -> ResponseEntity.ok(user))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -68,18 +85,9 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // extra endpoint to get users by email
-    @GetMapping("/by-email/{email}")
-    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
-        User user = userService.getUserByEmail(email);
-        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
-    }
-
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(
-            @PathVariable Long id,
-            @RequestBody User updatedUser) {
-        User user = userService.updateUser(id, updatedUser);
-        return user != null ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
+    @Transactional
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        return ResponseEntity.ok(userService.updateUser(id, updatedUser));
     }
 }
