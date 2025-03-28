@@ -1,20 +1,32 @@
 package com.example.user_service.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@Entity
+@Table(name="Orders")
 public class Order {
-    private Long id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
     private Long userId;
+
     private String product;
+
     private Long productID;
 
-    // Default constructor
-    public Order() {}
+    public Order() {
+    }
 
-    // Getters och Setters
-    @JsonProperty("id")
+    public Long getProductID() {
+        return productID;
+    }
+
+    public void setProductID(Long productID) {
+        this.productID = productID;
+    }
+
     public Long getId() {
         return id;
     }
@@ -23,7 +35,6 @@ public class Order {
         this.id = id;
     }
 
-    @JsonProperty("userId")
     public Long getUserId() {
         return userId;
     }
@@ -32,7 +43,6 @@ public class Order {
         this.userId = userId;
     }
 
-    @JsonProperty("product")
     public String getProduct() {
         return product;
     }
@@ -41,12 +51,5 @@ public class Order {
         this.product = product;
     }
 
-    @JsonProperty("productID")
-    public Long getProductID() {
-        return productID;
-    }
 
-    public void setProductID(Long productID) {
-        this.productID = productID;
-    }
 }

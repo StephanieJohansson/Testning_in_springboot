@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -38,11 +39,14 @@ public class UserController {
     @GetMapping("/{userId}/orders")
     public Mono<ResponseEntity<List<Order>>> getUserWithOrders(@PathVariable Long userId) {
         return webClient.get()
-                .uri("${order.service.url}")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/orders")
+                        .queryParam("userId", userId)
+                        .build())
                 .retrieve()
                 .bodyToFlux(Order.class)
-                .filter(order -> order.getUserId().equals(userId))
                 .collectList()
+                .timeout(Duration.ofSeconds(5))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.ok(Collections.emptyList()));
     }
