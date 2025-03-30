@@ -45,7 +45,7 @@ public class UserController {
                 .retrieve()
                 .bodyToFlux(Order.class)
                 .collectList()
-                .timeout(Duration.ofSeconds(5))
+                .timeout(Duration.ofSeconds(20))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.ok(Collections.emptyList()));
     }
