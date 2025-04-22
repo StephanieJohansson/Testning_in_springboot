@@ -20,7 +20,7 @@ public class UserController {
 
     private final WebClient webClient;
     private final UserRepository userRepository;
-    private final UserService userService;
+    public final UserService userService;
 
     @Autowired
     public UserController(WebClient.Builder webClientBuilder,
