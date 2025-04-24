@@ -8,10 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+// unit test for UserService with Mockito to isolate the test from the real Repository. Testing that when createUser
+// is called it should be saved in the mocked Repository. This test is to try logics from UserService without
+// dependence from the real Repository
 
 class UserServiceTest {
 
-// unit test
+
     @Test
     void createUserShouldCallRepositorySave(){
 
@@ -22,8 +25,6 @@ class UserServiceTest {
         //creating a fake user to try in the fake repo
         User user = new User(1L,"Benny", "Benny@email.com", "Street 1");
 
-        //fake scenario: when trying to call ID 1 it will return false
-        //when(mockedRepository.existsById(1L)).thenReturn(false);
 
         //Act
         //getting the fake user I just created under Arrange

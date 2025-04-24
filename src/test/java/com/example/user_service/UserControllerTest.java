@@ -17,7 +17,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// component test
+// component test for UserController with MockMvc to test the controllers behavior isolated from other parts of the app
+// MockMvc is used to simulate an HTTP call without a real/complete server and Mock is used to create fake/mocked
+// objects for the dependencies UserController needs to isolate the test
 
 class UserControllerTest {
     private MockMvc mockMvc;
@@ -31,7 +33,8 @@ class UserControllerTest {
     @Mock
     private WebClient.Builder webClientBuilder;
 
-    private UserController userController; // manuell instance
+    // manuel instance
+    private UserController userController;
 
     @BeforeEach
     void setup() {
@@ -42,7 +45,7 @@ class UserControllerTest {
         when(webClientBuilder.baseUrl(anyString())).thenReturn(webClientBuilder);
         when(webClientBuilder.build()).thenReturn(mockWebClient);
 
-        // Mock UserRepository behavior to return fake user
+        // Mock UserRepository behavior to return fake user by id
         User testUser = new User(1L, "Benny", "Benny@email.com", "Street 1");
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
@@ -50,7 +53,7 @@ class UserControllerTest {
         String orderServiceUrl = "http://localhost:8080";
         this.userController = new UserController(webClientBuilder, orderServiceUrl, userRepository, userService);
 
-        // initializing MockMvc
+        // initializing MockMvc. Configs to test the controller isolated
         this.mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
     }
 
@@ -67,10 +70,11 @@ class UserControllerTest {
 
         // perform GET /users/1 to verify the response
         mockMvc.perform(get("/users/1"))
-                .andExpect(status().isOk()) // Kontrollera HTTP 200
-                .andExpect(jsonPath("$.name").value(testUser.getName())) // Kontrollera namn
-                .andExpect(jsonPath("$.email").value(testUser.getEmail())) // Kontrollera e-post
-                .andExpect(jsonPath("$.address").value(testUser.getAddress())); // Kontrollera adress
+                // controlling HTTP 200, the name, email and address
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(testUser.getName()))
+                .andExpect(jsonPath("$.email").value(testUser.getEmail()))
+                .andExpect(jsonPath("$.address").value(testUser.getAddress()));
     }
 
 }
