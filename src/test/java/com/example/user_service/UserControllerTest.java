@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 // MockMvc is used to simulate an HTTP call without a real/complete server and Mock is used to create fake/mocked
 // objects for the dependencies UserController needs to isolate the test
 
+@SpringBootTest
 class UserControllerTest {
     private MockMvc mockMvc;
 
@@ -50,7 +52,7 @@ class UserControllerTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
         // initializing UserController with mocked dependencies
-        String orderServiceUrl = "http://localhost:8080";
+        String orderServiceUrl = "http://localhost:8081";
         this.userController = new UserController(webClientBuilder, orderServiceUrl, userRepository, userService);
 
         // initializing MockMvc. Configs to test the controller isolated
